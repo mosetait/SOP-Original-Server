@@ -9,6 +9,8 @@ const { Server } = require('socket.io');
 const { errorHandler } = require("./middlewares/errorMiddleware");
 const connectDB = require("./config/database");
 const connectCloudinary = require("./config/cloudinary");
+const path = require("path");
+
 
 
 require("dotenv").config();
@@ -45,6 +47,20 @@ app.use(
 
 
 
+app.use(
+    helmet({
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          imgSrc: ["'self'", "data:", "https://mdbcdn.b-cdn.net"],
+          // Add other CSP configurations as needed
+        },
+      },
+    })
+);
+
+
+
 // Cloudinary connection
 connectCloudinary();
 
@@ -61,10 +77,36 @@ app.use("/api/v1" , stockist);
 app.use("/api/v1" , admin);
 
 
-// Default route
-app.get("/", (req, res, next) => {
-  return res.end("<h1>Server is running</h1>");
+
+
+
+
+
+
+const NODE_ENV = "production";
+
+
+// Serve frontend
+if (NODE_ENV === "production") {
+    app.use(express.static(path.join(__dirname, "./dist")));
+  
+    app.get("*", (req, res) =>
+        res.sendFile(
+            path.resolve(__dirname, "./", "dist", "index.html")
+        )
+    );
+} else {
+    app.get("/", (req, res) => res.send("Please set to production"));
+}
+
+app.use("*", (req, res, next) => {
+    app.use("*", (req, res, next) => {
+    throw new Error("Not found");
 });
+    
+});
+
+
 
 
 
