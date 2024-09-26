@@ -6,7 +6,8 @@ const mongoose = require("mongoose")
 
 // Approve or Reject a Transaction
 exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
-  const { transactionId, status , stockistId} = req.body;
+
+  const { transactionId, status , stockistId } = req.body;
 
   // Check if the transactionId is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(transactionId)) {
@@ -28,7 +29,19 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
   if (status === 'rejected') {
     transaction.status = 'rejected';
     await transaction.save();
-    return res.status(200).json({ msg: "Transaction has been rejected", transaction });
+
+    // Find the toUser's wallet (we update the recipient's wallet)
+    const wallet = await Wallet.findOne({ user: stockistId }).populate({path: "transactionHistory"});
+    if (!wallet) {
+      return res.status(404).json({ msg: "Wallet not found for the recipient" });
+    }
+
+    const pendingOrRejectedTransactions = await Transaction.find({
+      status: { $in: ['pending', 'rejected'] },
+      fromUser: stockistId
+    });
+
+    return res.status(200).json({ msg: "Transaction has been rejected", wallet , pendingOrRejectedTransactions });
   }
 
   // If status is approved, update the wallet accordingly
@@ -36,7 +49,7 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
     const { amount, transactionCategory, toUser } = transaction;
 
     // Find the toUser's wallet (we update the recipient's wallet)
-    const wallet = await Wallet.findOne({ user: stockistId });
+    const wallet = await Wallet.findOne({ user: stockistId }).populate({path: "transactionHistory"});
     if (!wallet) {
       return res.status(404).json({ msg: "Wallet not found for the recipient" });
     }
@@ -74,6 +87,20 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
     transaction.status = 'approved';
     await transaction.save();
 
-    return res.status(200).json({ msg: "Transaction has been approved and wallet updated", transaction, wallet });
+
+
+    const pendingOrRejectedTransactions = await Transaction.find({
+      status: { $in: ['pending', 'rejected'] },
+      fromUser: stockistId
+    });
+
+    return res.status(200).json({ 
+      message: "Transaction has been approved and wallet updated", 
+      transaction, 
+      wallet ,
+      pendingOrRejectedTransactions
+    });
   }
+
+
 });

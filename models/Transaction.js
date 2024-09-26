@@ -10,29 +10,35 @@ const transactionSchema = new Schema({
     ref: 'User',  // Reference to either admin or stockist
     required: true
   },
+
   toUser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',  // Reference to either admin or stockist
     required: true
   },
+
   amount: {
     type: Number,
     required: true
   },
+
   transactionType: {
     type: String,
     enum: ['debit', 'credit'], // Debit (admin debits stockist), Credit (admin credits stockist)
     required: true
   },
+
   transactionCategory: {
     type: String,
     enum: ['BL', 'ST', 'CT'], // BL = Balance Transfer, ST = Stock Transfer, CT = Client Transfer
     required: true
   },
+
   description: {
     type: String,
     default: ""
   },
+
   proof: {
     publicId: {
       type: String,
@@ -43,6 +49,7 @@ const transactionSchema = new Schema({
       required: true
     }
   },
+  
   status: {
     type: String,
     enum: ['pending', 'approved', 'rejected'],

@@ -26,7 +26,12 @@ const userSchema = new Schema({
     required: true,
     enum: ["stockist" , "admin"],
     default: "stockist"
-  }
+  },
+
+  state:{
+    type: String,
+    required: true
+  },
 
 } , {timestamps: true});
 
