@@ -7,10 +7,11 @@ const jwt = require("jsonwebtoken");
 
 // Create a new User with Wallet
 exports.createUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role } = req.body;
+
+  const { name, email, password, role , state ,  address} = req.body.formData;
 
   // Check if all required fields are present
-  if (!name || !email || !password || !role) {
+  if (!name || !email || !password || !role || !state || !address) {
     return res.status(400).json({ msg: "Please provide all required fields" });
   }
 
@@ -30,6 +31,8 @@ exports.createUser = asyncHandler(async (req, res) => {
     email,
     password: hashedPassword,
     role,
+    state,  
+    address
   });
 
   await user.save();
@@ -43,7 +46,8 @@ exports.createUser = asyncHandler(async (req, res) => {
 
   await wallet.save();
 
-  res.status(201).json({ user, wallet });
+  const stockists = await User.find({role: "stockist"});
+  res.status(201).json({ user, wallet , stockists, message: "Stockist Registered successfully"});
 });
 
 

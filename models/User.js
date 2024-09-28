@@ -33,6 +33,11 @@ const userSchema = new Schema({
     required: true
   },
 
+  address:{
+    type: String,
+    required: true
+  },
+
 } , {timestamps: true});
 
 // Create the User model
