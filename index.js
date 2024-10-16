@@ -86,6 +86,7 @@ app.use("/api/v1" , admin);
 const NODE_ENV = "production";
 
 
+
 // Serve frontend
 if (NODE_ENV === "production") {
     app.use(express.static(path.join(__dirname, "./dist")));
@@ -98,6 +99,8 @@ if (NODE_ENV === "production") {
 } else {
     app.get("/", (req, res) => res.send("Please set to production"));
 }
+
+
 
 app.use("*", (req, res, next) => {
     app.use("*", (req, res, next) => {

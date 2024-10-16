@@ -1,11 +1,12 @@
 const Wallet = require('../models/Wallet');
 const User = require('../models/User');
+const Inventory = require('../models/Inventory');
 const bcrypt = require('bcrypt');
 const asyncHandler = require('../middlewares/asyncHandler');
 const jwt = require("jsonwebtoken");
 
 
-// Create a new User with Wallet
+// Create a new User with Wallet and Stock
 exports.createUser = asyncHandler(async (req, res) => {
 
   const { name, email, password, role , state ,  address} = req.body.formData;
@@ -45,6 +46,13 @@ exports.createUser = asyncHandler(async (req, res) => {
   });
 
   await wallet.save();
+
+
+  // create stock
+  const inventroy = await Inventory.create({
+    stockist: user?._id
+  })
+
 
   const stockists = await User.find({role: "stockist"});
   res.status(201).json({ user, wallet , stockists, message: "Stockist Registered successfully"});
@@ -161,7 +169,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
   // Check if the password is correct
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
-    return res.status(400).json({ msg: "Invalid credentials" });
+    return res.status(400).json({ message: "Invalid credentials" });
   }
 
   // Generate a token and store it in a cookie

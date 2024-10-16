@@ -1,6 +1,9 @@
 const Transaction = require("../../models/Transaction");
 const User = require("../../models/User");
 const Wallet = require("../../models/Wallet");
+const Inventory = require("../../models/Inventory");
+const Product = require("../../models/Product");
+const DeliveryChallan = require("../../models/DeliveryChallan");
 const asyncHandler = require("../../middlewares/asyncHandler");
 const mongoose = require("mongoose")
 
@@ -103,4 +106,112 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
   }
 
 
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// Send Stock from delivery Challan
+exports.stockTransferFromAdmin = asyncHandler(async (req, res) => {
+  const { products, stockistId, total, deliveryChallanNumber, issueDate } = req.body;
+
+  // Validate the stockist ID
+  if (!stockistId) {
+    return res.status(401).json({
+      message: "Please provide stockist Id",
+      success: false
+    });
+  }
+
+  // Validate the products array
+  if (!products || !products.length > 0) {
+    return res.status(401).json({
+      message: "Please add products!",
+      success: false
+    });
+  }
+
+  // Check if the stockist exists
+  const stockist = await User.findOne({ _id: stockistId });
+
+  if (!stockist) {
+    return res.status(404).json({
+      message: "Stockist not found",
+      success: false
+    });
+  }
+
+  // Check if the stockist's inventory exists
+  const inventory = await Inventory.findOne({ stockist: stockist._id });
+
+  if (!inventory) {
+    return res.status(404).json({
+      message: "Stockist's Inventory Not Found.",
+      success: false
+    });
+  }
+
+  // Create a new delivery challan
+  const newDeliveryChallan = await DeliveryChallan.create({
+    deliveryChallanNumber,
+    total,
+    stockist: stockist._id,
+    date: issueDate,
+    items: products
+  });
+
+
+
+  // Update the stockist's inventory
+  for (const product of products) {
+    const productDetails = await Product.findById(product.product._id);
+
+    if (!productDetails) {
+      return res.status(404).json({
+        message: `Product with ID ${product.productId} not found.`,
+        success: false
+      });
+    }
+
+    const inventoryItemIndex = inventory.items.findIndex(
+      (item) => item.product.toString() === product.product._id
+    );
+
+
+    if (inventoryItemIndex !== -1) {
+      // If the product exists in the stockist's inventory, update the quantity
+      inventory.items[inventoryItemIndex].quantity += product.quantity;
+    } else {
+      // If the product does not exist, add it to the stockist's inventory
+      inventory.items.push({
+        product: product.product._id,
+        quantity: product.quantity
+      });
+    }
+  }
+
+  // Save the updated inventory
+  await inventory.save();
+
+  return res.status(200).json({
+    message: "Stock transfer and delivery challan creation successful",
+    success: true,
+    deliveryChallan: newDeliveryChallan
+  });
 });
