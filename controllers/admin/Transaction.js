@@ -7,6 +7,11 @@ const DeliveryChallan = require("../../models/DeliveryChallan");
 const asyncHandler = require("../../middlewares/asyncHandler");
 const mongoose = require("mongoose")
 
+
+
+
+
+
 // Approve or Reject a Transaction
 exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
 
@@ -120,13 +125,6 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
 
 
 
-
-
-
-
-
-
-
 // Send Stock from delivery Challan
 exports.stockTransferFromAdmin = asyncHandler(async (req, res) => {
   const { products, stockistId, total, deliveryChallanNumber, issueDate } = req.body;
@@ -215,3 +213,17 @@ exports.stockTransferFromAdmin = asyncHandler(async (req, res) => {
     deliveryChallan: newDeliveryChallan
   });
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+

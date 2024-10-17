@@ -4,6 +4,7 @@ const { approveOrRejectTransaction, stockTransferFromAdmin } = require("../contr
 const { fetchAllStockists, fetchSingleStockist } = require("../controllers/admin/Stockist");
 const { createUser } = require("../controllers/Auth");
 const { createCategory, updateCategory, deleteCategory, getAllCategories, getCategoryById, createProduct, updateProduct, deleteProduct, getAllProducts, getProductById } = require("../controllers/admin/Product");
+const { getDeliveryChallans } = require("../controllers/admin/getController");
 const router = express.Router();
 
 router.route("/update_transaction_status").put(auth , isAdmin , approveOrRejectTransaction);
@@ -36,6 +37,11 @@ router.route("/get_product_by_id/:id").get(auth , isAdmin , getProductById);
 
 // transaction
 router.route("/stock_transfer_admin").post(auth , isAdmin , stockTransferFromAdmin);
+
+
+
+// get routes
+router.route("/get_delivery_challans").post(auth , isAdmin , getDeliveryChallans);
 
 
 module.exports = router;
