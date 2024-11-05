@@ -1,19 +1,17 @@
-const DeliveryChallan = require("../../models/DeliveryChallan");
 const Category = require("../../models/Category");
+const DeliveryChallan = require("../../models/DeliveryChallan");
 const Inventory = require("../../models/Inventory");
 const Product = require("../../models/Product");
 const Transaction = require("../../models/Transaction");
 const User = require("../../models/User");
 const Wallet = require("../../models/Wallet");
 const asyncHandler = require("../../middlewares/asyncHandler");
-const ServiceAndRepair = require("../../models/ServiceAndRepair");
+const ExpenseOwnedByCompany = require("../../models/ExpenseOwnedByCompany")
 
 
 
-
-
-// Get sales - admin
-exports.getDeliveryChallans = asyncHandler(async (req, res) => {
+// get delivery challans for stockist
+exports.getDeliveryChallansForStockist = asyncHandler(async (req, res) => {
     
     const { month, year } = req.body.formattedDate;
 
@@ -42,7 +40,8 @@ exports.getDeliveryChallans = asyncHandler(async (req, res) => {
             date: {
                 $gte: startDate,
                 $lt: endDate
-            }
+            },
+            stockist: req.user._id
         })
         .populate('stockist', 'name email') // Populate stockist with name and email
         .populate('items.product', 'name'); // Populate product name in items array
@@ -72,38 +71,51 @@ exports.getDeliveryChallans = asyncHandler(async (req, res) => {
 
 
 
-// fetch service requests
-exports.fetchServiceRequestsAdmin = asyncHandler( async (req,res) => {
 
-    const serviceRequests = await ServiceAndRepair.find()
-    .populate({path: "selectedCategory"})
-    .populate({path: "selectedProduct"})
-    .populate({path: "stockist"})
-  
-    return res.status(200).json({
-      message: "Service Requests fetched successfully",
-      success: true,
-      serviceRequests
-    })
-  
-})
+// fetch inventory
+exports.fetchInventory = asyncHandler( async (req,res) => {
 
-
-
-
-
-
-// fetch service requests
-exports.fetchInventoryAdmin = asyncHandler( async (req,res) => {
-
-    const {id} = req.params;
- 
-    const inventory = await Inventory.findOne({ stockist: id })
+    const inventory = await Inventory.findOne({ stockist: req.user.id })
     .populate({ path: "items.product" });
 
     return res.status(200).json({
         message: "Inventory Fetched Successfully",
         inventory
     })
-  
+
 })
+
+
+
+
+// fetch all expenses with all stockists
+exports.fetchAllExpensesStockist = asyncHandler(async (req, res) => {
+    const { month, year } = req.query;
+
+    // Build a filter object based on provided month, year, and the logged-in stockist's ID
+    const filter = { stockist: req.user.id };
+    if (month) filter.month = month;
+    if (year) filter.year = year;
+
+    try {
+        // Fetch expenses with the month, year, and stockist filter, and populate the stockist field
+        const expenses = await ExpenseOwnedByCompany.find(filter).populate({ path: "stockist" });
+
+        // Return the found expenses
+        return res.status(200).json({
+            message: "Expenses retrieved successfully.",
+            success: true,
+            expenses
+        });
+    } 
+    catch (error) {
+        // Handle any errors that occur during fetching
+        return res.status(500).json({
+            message: "Failed to fetch expenses.",
+            success: false,
+            error: error.message
+        });
+    }
+});
+
+

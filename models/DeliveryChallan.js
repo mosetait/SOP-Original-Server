@@ -10,6 +10,11 @@ const deliveryChallanSchema = new Schema({
         required: true
     },
 
+    ewayBillNumber: {
+        type: String,
+        required: true
+    },
+
     stockist:{
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
@@ -23,6 +28,10 @@ const deliveryChallanSchema = new Schema({
                 ref: "Product"
             },
             price:{
+                type: Number,
+                required: true
+            },
+            gst:{
                 type: Number,
                 required: true
             },

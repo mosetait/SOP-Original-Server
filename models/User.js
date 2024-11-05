@@ -38,6 +38,12 @@ const userSchema = new Schema({
     required: true
   },
 
+  commissionBased:{
+    required: true,
+    type: Boolean,
+    default: false
+  }
+
 } , {timestamps: true});
 
 // Create the User model

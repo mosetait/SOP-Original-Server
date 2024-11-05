@@ -1,10 +1,11 @@
 const express = require("express");
 const { auth, isAdmin } = require("../middlewares/auth");
 const { approveOrRejectTransaction, stockTransferFromAdmin } = require("../controllers/admin/Transaction");
-const { fetchAllStockists, fetchSingleStockist } = require("../controllers/admin/Stockist");
+const { fetchAllStockists, fetchSingleStockist, createExpense, fetchAllExpenses, updateExpense } = require("../controllers/admin/Stockist");
 const { createUser } = require("../controllers/Auth");
 const { createCategory, updateCategory, deleteCategory, getAllCategories, getCategoryById, createProduct, updateProduct, deleteProduct, getAllProducts, getProductById } = require("../controllers/admin/Product");
-const { getDeliveryChallans } = require("../controllers/admin/getController");
+const { getDeliveryChallans, fetchServiceRequestsAdmin, fetchInventoryAdmin } = require("../controllers/admin/getController");
+const { updateServiceAndRepairStatus } = require("../controllers/admin/ServiceAndRepair");
 const router = express.Router();
 
 router.route("/update_transaction_status").put(auth , isAdmin , approveOrRejectTransaction);
@@ -23,7 +24,7 @@ router.route("/create_stockist").post(auth , isAdmin , createUser);
 router.route("/create_category").post(auth , isAdmin , createCategory);
 router.route("/update_category").put(auth , isAdmin , updateCategory);
 router.route("/delete_category").delete(auth , isAdmin , deleteCategory);
-router.route("/get_all_categories").get(auth , isAdmin , getAllCategories);
+router.route("/get_all_categories").get(auth , getAllCategories);
 router.route("/get_category_by_id/:id").get(auth , isAdmin , getCategoryById);
 
 // product
@@ -40,8 +41,21 @@ router.route("/stock_transfer_admin").post(auth , isAdmin , stockTransferFromAdm
 
 
 
+// Expense owned by company
+router.route("/create_expense").post(auth, isAdmin, createExpense);
+router.route("/fetch_expenses").get(auth, isAdmin, fetchAllExpenses);
+router.route("/update_expenses/:id").put(auth, isAdmin, updateExpense);
+
+
+// service & repair
+router.route("/update_request/:id").put(auth, isAdmin, updateServiceAndRepairStatus);
+
+
+
 // get routes
 router.route("/get_delivery_challans").post(auth , isAdmin , getDeliveryChallans);
+router.route("/fetch_service_requests_admin").get(auth , isAdmin , fetchServiceRequestsAdmin);
+router.route("/fetch_inventory/:id").get(auth , isAdmin, fetchInventoryAdmin);
 
 
 module.exports = router;

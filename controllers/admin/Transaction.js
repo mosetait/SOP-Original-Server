@@ -127,7 +127,7 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
 
 // Send Stock from delivery Challan
 exports.stockTransferFromAdmin = asyncHandler(async (req, res) => {
-  const { products, stockistId, total, deliveryChallanNumber, issueDate } = req.body;
+  const { products, stockistId, total, deliveryChallanNumber,ewayBillNumber, issueDate } = req.body;
 
   // Validate the stockist ID
   if (!stockistId) {
@@ -171,7 +171,8 @@ exports.stockTransferFromAdmin = asyncHandler(async (req, res) => {
     total,
     stockist: stockist._id,
     date: issueDate,
-    items: products
+    items: products,
+    ewayBillNumber
   });
 
 

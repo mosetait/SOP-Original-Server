@@ -6,10 +6,14 @@ const asyncHandler = require('../middlewares/asyncHandler');
 const jwt = require("jsonwebtoken");
 
 
+
+
+
+
 // Create a new User with Wallet and Stock
 exports.createUser = asyncHandler(async (req, res) => {
 
-  const { name, email, password, role , state ,  address} = req.body.formData;
+  const { name, email, password, role , state ,  address , commissionBased} = req.body.formData;
 
   // Check if all required fields are present
   if (!name || !email || !password || !role || !state || !address) {
@@ -33,7 +37,8 @@ exports.createUser = asyncHandler(async (req, res) => {
     password: hashedPassword,
     role,
     state,  
-    address
+    address,
+    commissionBased
   });
 
   await user.save();
@@ -60,11 +65,17 @@ exports.createUser = asyncHandler(async (req, res) => {
 
 
 
+
+
+
 // Get all users
 exports.getAllUsers = asyncHandler(async (req, res) => {
   const users = await User.find();
   res.status(200).json(users);
 });
+
+
+
 
 
 
@@ -82,6 +93,9 @@ exports.getUserById = asyncHandler(async (req, res) => {
 
   res.status(200).json(user);
 });
+
+
+
 
 
 
@@ -122,6 +136,9 @@ exports.updateUser = asyncHandler(async (req, res) => {
 
 
 
+
+
+
 // Delete user by ID
 exports.deleteUser = asyncHandler(async (req, res) => {
   // Validate ID
@@ -149,6 +166,8 @@ exports.deleteUser = asyncHandler(async (req, res) => {
 const generateToken = (user) => {
   return jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 };
+
+
 
 
 // Login User
@@ -189,6 +208,7 @@ exports.loginUser = asyncHandler(async (req, res) => {
 
 
 
+
 // Load User - Keep user logged in
 exports.loadUser = asyncHandler(async (req, res) => {
   const token = req.cookies.token;
@@ -211,6 +231,8 @@ exports.loadUser = asyncHandler(async (req, res) => {
     return res.status(401).json({ msg: "Token is invalid" });
   }
 });
+
+
 
 
 
