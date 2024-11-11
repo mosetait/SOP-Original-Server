@@ -7,11 +7,7 @@ const walletSchema = new Schema({
     ref: 'User',
     required: true
   },
-  lockedFund: {
-    type: Number,
-    default: 0
-  },
-  rotationalFund: {
+  fund: {
     type: Number,
     default: 0
   },

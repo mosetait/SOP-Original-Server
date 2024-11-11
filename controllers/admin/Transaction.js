@@ -15,7 +15,7 @@ const mongoose = require("mongoose")
 // Approve or Reject a Transaction
 exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
 
-  const { transactionId, status , stockistId } = req.body;
+  const { transactionId, status, stockistId } = req.body;
 
   // Check if the transactionId is a valid MongoDB ObjectId
   if (!mongoose.Types.ObjectId.isValid(transactionId)) {
@@ -38,8 +38,8 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
     transaction.status = 'rejected';
     await transaction.save();
 
-    // Find the toUser's wallet (we update the recipient's wallet)
-    const wallet = await Wallet.findOne({ user: stockistId }).populate({path: "transactionHistory"});
+    // Find the toUser's wallet
+    const wallet = await Wallet.findOne({ user: stockistId }).populate({ path: "transactionHistory" });
     if (!wallet) {
       return res.status(404).json({ msg: "Wallet not found for the recipient" });
     }
@@ -49,43 +49,21 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
       fromUser: stockistId
     });
 
-    return res.status(200).json({ msg: "Transaction has been rejected", wallet , pendingOrRejectedTransactions });
+    return res.status(200).json({ msg: "Transaction has been rejected", wallet, pendingOrRejectedTransactions });
   }
 
   // If status is approved, update the wallet accordingly
   if (status === 'approved') {
-    const { amount, transactionCategory, toUser } = transaction;
+    const { amount } = transaction;
 
-    // Find the toUser's wallet (we update the recipient's wallet)
-    const wallet = await Wallet.findOne({ user: stockistId }).populate({path: "transactionHistory"});
+    // Find the toUser's wallet
+    const wallet = await Wallet.findOne({ user: stockistId }).populate({ path: "transactionHistory" });
     if (!wallet) {
       return res.status(404).json({ msg: "Wallet not found for the recipient" });
     }
 
-    // Logic for Balance Transfer (BL)
-    if (transactionCategory === 'BL') {
-      const maxLockedFund = 3000000; // 30 lakh (3 million)
-
-      // Check if lockedFund has reached 30 lakh
-      if (wallet.lockedFund < maxLockedFund) {
-        const remainingSpace = maxLockedFund - wallet.lockedFund;
-
-        if (amount <= remainingSpace) {
-          // If the amount can fully fit into lockedFund
-          wallet.lockedFund += amount;
-        } else {
-          // If part of the amount goes into lockedFund and the rest into rotationalFund
-          wallet.lockedFund = maxLockedFund;
-          wallet.rotationalFund += (amount - remainingSpace);
-        }
-      } else {
-        // If lockedFund is already at max, add everything to rotationalFund
-        wallet.rotationalFund += amount;
-      }
-    } else {
-      // For ST and CT, add everything to the rotational fund
-      wallet.rotationalFund += amount;
-    }
+    // Add the transaction amount directly to the fund
+    wallet.fund += amount;
 
     // Add the transaction to the user's transaction history
     wallet.transactionHistory.push(transaction._id);
@@ -95,8 +73,6 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
     transaction.status = 'approved';
     await transaction.save();
 
-
-
     const pendingOrRejectedTransactions = await Transaction.find({
       status: { $in: ['pending', 'rejected'] },
       fromUser: stockistId
@@ -105,14 +81,11 @@ exports.approveOrRejectTransaction = asyncHandler(async (req, res) => {
     return res.status(200).json({ 
       message: "Transaction has been approved and wallet updated", 
       transaction, 
-      wallet ,
+      wallet,
       pendingOrRejectedTransactions
     });
   }
-
-
 });
-
 
 
 

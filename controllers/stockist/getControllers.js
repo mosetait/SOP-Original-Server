@@ -76,7 +76,14 @@ exports.getDeliveryChallansForStockist = asyncHandler(async (req, res) => {
 exports.fetchInventory = asyncHandler( async (req,res) => {
 
     const inventory = await Inventory.findOne({ stockist: req.user.id })
-    .populate({ path: "items.product" });
+    .populate({
+        path: "items.product",      // Populate the product in each inventory item
+        populate: {
+            path: "category",        // Populate the category within each product
+            model: "Category"
+        }
+    });
+
 
     return res.status(200).json({
         message: "Inventory Fetched Successfully",

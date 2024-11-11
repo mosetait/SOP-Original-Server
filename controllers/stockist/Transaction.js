@@ -48,12 +48,11 @@ exports.BalanceTransferStockist = asyncHandler(async (req, res) => {
   await transaction.save();
 
   const wallet = await Wallet.find()
-                      .populate({path: "transactionHistory"})
+                      .populate({path: "transactionHistory"});
 
   const pendingOrRejectedTransactions = await Transaction.find({
     status: { $in: ['pending', 'rejected'] }
   });
-
 
   res.status(201).json({transaction , wallet , pendingOrRejectedTransactions});
 });
