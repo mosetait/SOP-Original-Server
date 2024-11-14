@@ -4,7 +4,7 @@ const { approveOrRejectTransaction, stockTransferFromAdmin } = require("../contr
 const { fetchAllStockists, fetchSingleStockist, createExpense, fetchAllExpenses, updateExpense } = require("../controllers/admin/Stockist");
 const { createUser } = require("../controllers/Auth");
 const { createCategory, updateCategory, deleteCategory, getAllCategories, getCategoryById, createProduct, updateProduct, deleteProduct, getAllProducts, getProductById } = require("../controllers/admin/Product");
-const { getDeliveryChallans, fetchServiceRequestsAdmin, fetchInventoryAdmin } = require("../controllers/admin/getController");
+const { getDeliveryChallans, fetchServiceRequestsAdmin, fetchInventoryAdmin, calculateCommission } = require("../controllers/admin/getController");
 const { updateServiceAndRepairStatus } = require("../controllers/admin/ServiceAndRepair");
 const router = express.Router();
 
@@ -50,6 +50,9 @@ router.route("/update_expenses/:id").put(auth, isAdmin, updateExpense);
 // service & repair
 router.route("/update_request/:id").put(auth, isAdmin, updateServiceAndRepairStatus);
 
+
+// 2% commission
+router.route("/calculate_commission").post(auth , isAdmin, calculateCommission);
 
 
 // get routes

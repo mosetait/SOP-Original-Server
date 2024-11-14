@@ -55,6 +55,12 @@ const saleSchema = new Schema({
         required: true
     },
 
+    client:{
+        type: String,
+        required: true,
+        enum: ["distributor" , "dealer" , "customer" , "self" ]
+    },
+
     // GST total for the sale
     totalGST: {
         type: Number,
@@ -98,7 +104,7 @@ const saleSchema = new Schema({
     },
 
     issueDate: {
-        type: String,
+        type: Date,
         required: true
     }
 

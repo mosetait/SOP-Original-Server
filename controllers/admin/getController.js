@@ -6,6 +6,7 @@ const Transaction = require("../../models/Transaction");
 const User = require("../../models/User");
 const Wallet = require("../../models/Wallet");
 const asyncHandler = require("../../middlewares/asyncHandler");
+const Sale = require("../../models/Sale");
 const ServiceAndRepair = require("../../models/ServiceAndRepair");
 
 
@@ -107,3 +108,103 @@ exports.fetchInventoryAdmin = asyncHandler( async (req,res) => {
     })
   
 })
+
+
+
+
+
+
+
+
+
+
+// Helper function to convert month name to date
+const monthToDate = (monthName, year = new Date().getFullYear()) => {
+    const monthIndex = new Date(Date.parse(monthName + " 1, " + year)).getMonth();
+    return new Date(year, monthIndex, 1);
+};
+
+
+
+// calculate commission
+exports.calculateCommission = asyncHandler(async (req, res) => {
+    const {
+        selectedStockist,
+        commissionType,
+        selectedMonth,
+        quarterStartMonth,
+        quarterEndMonth
+    } = req.body;
+
+    // find the stockist
+    const stockist = await User.findOne({ _id: selectedStockist });
+
+    if (!stockist) {
+        return res.status(404).json({
+            message: "Stockist Not found"
+        });
+    }
+
+    // Define the query object
+    let query = { stockist: selectedStockist };
+
+    let expectedCommission = 0;
+
+
+    // Filter sales based on the commission type
+    if (commissionType === "monthly") {
+        // Convert selected month to date range
+        const startOfMonth = monthToDate(selectedMonth);
+        const endOfMonth = new Date(startOfMonth.getFullYear(), startOfMonth.getMonth() + 1, 0);
+
+        expectedCommission = 60000;
+
+        query.issueDate = {
+            $gte: startOfMonth,
+            $lte: endOfMonth
+        };
+
+    } else if (commissionType === "quarterly") {
+        // Convert quarter start and end months to date range
+        const startOfQuarter = monthToDate(quarterStartMonth);
+        const endOfQuarter = new Date(monthToDate(quarterEndMonth).getFullYear(), monthToDate(quarterEndMonth).getMonth() + 1, 0);
+
+        expectedCommission = 60000 * 4;
+
+        query.issueDate = {
+            $gte: startOfQuarter,
+            $lte: endOfQuarter
+        };
+    }
+
+    // Fetch all sales based on the defined query
+    const sales = await Sale.find(query)
+    .populate({
+        path: 'items.product', // Populate product details in each item
+        model: 'Product'
+    })
+    .populate({
+        path: 'stockist', // Populate stockist details
+        model: 'User'
+    });
+
+    // Calculate the commission value from base prices
+    let commissionTotal = 0;
+
+    sales.forEach(sale => {
+        sale.items.forEach(item => {
+            const itemCommission = item.margin * item.quantity;
+            commissionTotal += itemCommission;
+        });
+    });
+
+
+
+    // Return the sales data in response
+    return res.status(200).json({
+        message: "Sales fetched successfully",
+        sales,
+        commissionTotal,
+        expectedCommission
+    });
+});

@@ -16,7 +16,8 @@ const Sale = require("../../models/Sale");
 // create Sale
 exports.createSale = asyncHandler(async (req, res) => {
 
-    const { products, total, billNumber, issueDate, clientDetails } = req.body;
+    const { products, total, billNumber, issueDate, clientDetails , clientType} = req.body;
+
 
     // Find the stockist's inventory
     const inventory = await Inventory.findOne({ stockist: req.user.id });
@@ -49,7 +50,7 @@ exports.createSale = asyncHandler(async (req, res) => {
     // Calculate items array with basePrice, margin, and total for each product
     const items = products.map(({ product, quantity, price, gst }) => {
         const basePrice = price / (1 + gst / 100);  // Calculate base price by removing GST from price
-        const margin = basePrice * 0.1;  // Assuming a 10% margin on the base price
+        const margin = basePrice - (basePrice / 1.10);  // Assuming a 10% margin on the base price
         const itemTotal = price * quantity;
 
         return {
@@ -106,6 +107,7 @@ exports.createSale = asyncHandler(async (req, res) => {
         billNumber,
         issueDate,
         totalWithoutGST,
+        client: clientType,
         fundInWalletBeforeDeduction: stockistWallet.fund + totalWithoutGST // Original fund amount before deduction
     });
 

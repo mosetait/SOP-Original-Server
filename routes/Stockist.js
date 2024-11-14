@@ -2,7 +2,7 @@ const express = require("express");
 const { BalanceTransferStockist } = require("../controllers/stockist/Transaction");
 const { auth, isStockist } = require("../middlewares/auth");
 const { FetchStockistDeposits } = require("../controllers/Common");
-const { getDeliveryChallansForStockist, fetchInventory, fetchAllExpensesStockist } = require("../controllers/stockist/getControllers");
+const { getDeliveryChallansForStockist, fetchInventory, fetchAllExpensesStockist, calculateCommissionStockist } = require("../controllers/stockist/getControllers");
 const { createServiceAndRepair, fetchServiceRequests } = require("../controllers/stockist/ServiceAndRepair");
 const { getStockistSales, createSale } = require("../controllers/stockist/Sale");
 const router = express.Router();
@@ -20,6 +20,11 @@ router.route("/create_request").post(auth, isStockist, createServiceAndRepair);
 
 // sale
 router.route("/create_sale").post(auth, isStockist, createSale);
+
+
+// 2% commission
+router.route("/calculate_commission_stockist").post(auth , isStockist, calculateCommissionStockist);
+
 
 
 // get controllers
