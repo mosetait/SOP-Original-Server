@@ -2,7 +2,7 @@ const express = require("express");
 const { BalanceTransferStockist } = require("../controllers/stockist/Transaction");
 const { auth, isStockist } = require("../middlewares/auth");
 const { FetchStockistDeposits } = require("../controllers/Common");
-const { getDeliveryChallansForStockist, fetchInventory, fetchAllExpensesStockist, calculateCommissionStockist } = require("../controllers/stockist/getControllers");
+const { getDeliveryChallansForStockist, fetchInventory, fetchAllExpensesStockist, calculateCommissionStockist, fetchStockistPurchase } = require("../controllers/stockist/getControllers");
 const { createServiceAndRepair, fetchServiceRequests } = require("../controllers/stockist/ServiceAndRepair");
 const { getStockistSales, createSale } = require("../controllers/stockist/Sale");
 const router = express.Router();
@@ -33,6 +33,7 @@ router.route("/fetch_inventory").get(auth , isStockist, fetchInventory);
 router.route("/fetch_expenses_stk").get(auth , isStockist, fetchAllExpensesStockist);
 router.route("/fetch_service_requests").get(auth , isStockist, fetchServiceRequests);
 router.route("/get_stockist_sales").get(auth , isStockist, getStockistSales);
+router.route("/purchases").get(auth , isStockist, fetchStockistPurchase);
 
 
 

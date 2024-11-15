@@ -8,7 +8,7 @@ const Wallet = require("../../models/Wallet");
 const asyncHandler = require("../../middlewares/asyncHandler");
 const Sale = require("../../models/Sale");
 const ServiceAndRepair = require("../../models/ServiceAndRepair");
-
+const Purchase = require("../../models/Purchase")
 
 
 
@@ -206,5 +206,59 @@ exports.calculateCommission = asyncHandler(async (req, res) => {
         sales,
         commissionTotal,
         expectedCommission
+    });
+});
+
+
+
+
+
+
+
+// calculate or fetch purchase 
+exports.fetchStockistPurchaseAdmin = asyncHandler(async (req, res) => {
+    const { type, year, month, months,stockistId } = req.query;
+    let query = {};
+
+    // Include stockist filter using req.user.id
+    query.stockist = stockistId;
+
+    if (type === "monthly" && month && year) {
+        // Parse month and year
+        const startDate = new Date(`${month} 1, ${year}`);
+        const endDate = new Date(startDate);
+        endDate.setMonth(endDate.getMonth() + 1);
+
+        query.issueDate = { $gte: startDate, $lt: endDate };
+    } 
+    else if (type === "yearly" && year) {
+        const startDate = new Date(`January 1, ${year}`);
+        const endDate = new Date(`January 1, ${parseInt(year) + 1}`);
+        
+        query.issueDate = { $gte: startDate, $lt: endDate };
+    }
+    else if (type === "selectedMonths" && months && year) {
+        const monthIndices = months.map(m => new Date(`${m} 1, ${year}`).getMonth());
+        query.issueDate = {
+            $gte: new Date(`January 1, ${year}`),
+            $lt: new Date(`January 1, ${parseInt(year) + 1}`),
+        };
+        query.$expr = { $in: [{ $month: "$issueDate" }, monthIndices.map(i => i + 1)] };
+    }
+
+    // Fetch purchases based on the query
+    const purchases = await Purchase.find(query)
+        .populate({
+            path: 'items.product', // Populate product details in each item
+            model: 'Product'
+        })
+        .populate({
+            path: 'stockist', // Populate stockist details
+            model: 'User'
+        });
+
+    res.status(200).json({
+        purchases,
+        message: "Sales Fetched."
     });
 });

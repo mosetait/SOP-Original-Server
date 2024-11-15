@@ -4,7 +4,7 @@ const { approveOrRejectTransaction, stockTransferFromAdmin } = require("../contr
 const { fetchAllStockists, fetchSingleStockist, createExpense, fetchAllExpenses, updateExpense } = require("../controllers/admin/Stockist");
 const { createUser } = require("../controllers/Auth");
 const { createCategory, updateCategory, deleteCategory, getAllCategories, getCategoryById, createProduct, updateProduct, deleteProduct, getAllProducts, getProductById } = require("../controllers/admin/Product");
-const { getDeliveryChallans, fetchServiceRequestsAdmin, fetchInventoryAdmin, calculateCommission } = require("../controllers/admin/getController");
+const { getDeliveryChallans, fetchServiceRequestsAdmin, fetchInventoryAdmin, calculateCommission, fetchStockistPurchaseAdmin } = require("../controllers/admin/getController");
 const { updateServiceAndRepairStatus } = require("../controllers/admin/ServiceAndRepair");
 const router = express.Router();
 
@@ -59,6 +59,7 @@ router.route("/calculate_commission").post(auth , isAdmin, calculateCommission);
 router.route("/get_delivery_challans").post(auth , isAdmin , getDeliveryChallans);
 router.route("/fetch_service_requests_admin").get(auth , isAdmin , fetchServiceRequestsAdmin);
 router.route("/fetch_inventory/:id").get(auth , isAdmin, fetchInventoryAdmin);
+router.route("/purchases/admin").get(auth , isAdmin, fetchStockistPurchaseAdmin);
 
 
 module.exports = router;
