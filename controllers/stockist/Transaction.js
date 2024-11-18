@@ -8,10 +8,11 @@ const { uploadImageToCloudinary } = require("../../utils/imageUploader");
 // Create a new transaction
 exports.BalanceTransferStockist = asyncHandler(async (req, res) => {
 
-  const { fromUser, toUser, amount, transactionType, transactionCategory, description } = req.body;
+  const { fromUser, toUser, amount, transactionType, transactionCategory, description,transactionDate } = req.body;
+
 
   // Validate input fields
-  if (!fromUser || !toUser || !amount || !transactionType || !transactionCategory) {
+  if (!fromUser || !toUser || !amount || !transactionType || !transactionCategory || !transactionDate) {
     return res.status(400).json({ message: "Please provide all required fields" });
   }
 
@@ -42,7 +43,8 @@ exports.BalanceTransferStockist = asyncHandler(async (req, res) => {
     transactionType,
     transactionCategory,
     description,
-    proof
+    proof,
+    transactionDate
   });
 
   await transaction.save();

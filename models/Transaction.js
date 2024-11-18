@@ -56,6 +56,11 @@ const transactionSchema = new Schema({
     default: 'pending'
   },
 
+  transactionDate:{
+    type: Date,
+    required: true
+  }
+
 }, { timestamps: true });
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
